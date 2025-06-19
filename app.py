@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 import sqlite3
+import csv
+import os
 
 app = Flask(__name__)
 
@@ -39,9 +41,6 @@ def show_entries():
     conn.close()
     return render_template('entries.html', entries=rows)
 
-import csv
-from flask import Response
-
 @app.route('/export')
 def export_csv():
     conn = sqlite3.connect('data.db')
@@ -50,7 +49,6 @@ def export_csv():
     rows = cursor.fetchall()
     conn.close()
 
-    # Create CSV response
     def generate():
         yield 'Name,Class,Email\n'
         for row in rows:
@@ -61,4 +59,5 @@ def export_csv():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
